@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cyber-ROI Dashboard</title>
+<style>
+  body { font-family: Tahoma, Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 24px; }
+  h1 { margin: 0 0 4px; }
+  .sub { color: #94a3b8; margin-bottom: 24px; }
+  .cards { display: flex; gap: 16px; flex-wrap: wrap; }
+  .card { background: #1e293b; border-radius: 12px; padding: 20px; flex: 1; min-width: 240px; border-top: 4px solid #64748b; }
+  .card.best { border-top-color: #22c55e; }
+  .card.warn { border-top-color: #ef4444; }
+  .card.mid { border-top-color: #f59e0b; }
+  .card h2 { margin: 0 0 12px; font-size: 18px; }
+  .big { font-size: 30px; font-weight: bold; margin: 4px 0; }
+  .label { color: #94a3b8; font-size: 13px; }
+  .row { margin-top: 12px; }
+  .note { margin-top: 24px; color: #94a3b8; font-size: 13px; }
+  #error { color: #fca5a5; }
+</style>
+</head>
+<body>
+  <h1>محاكي العائد على الاستثمار السيبراني</h1>
+  <div class="sub">الأرقام بالدولار الأمريكي، مبنية على بيانات توضيحية</div>
+  <div id="error"></div>
+  <div class="cards" id="cards">جاري التحميل...</div>
+  <div class="note">تنبيه: قيم الأجهزة والتكاليف افتراضات تجريبية، وليست بيانات عميل حقيقية.</div>
+
+<script>
+const NAMES = {
+  no_protection: "بدون حماية",
+  segmentation: "فصل الشبكة",
+  segmentation_plus_critical: "فصل + حماية الأجهزة الحرجة"
+};
+const STYLES = {
+  no_protection: "warn",
+  segmentation: "mid",
+  segmentation_plus_critical: "best"
+};
+const usd = n => "$" + Number(n).toLocaleString("en-US");
+
+fetch("/scenarios")
+  .then(r => r.json())
+  .then(data => {
+    const html = data.scenarios.map(s => `
+      <div class="card ${STYLES[s.scenario]}">
+        <h2>${NAMES[s.scenario] || s.scenario}</h2>
+        <div class="label">أسوأ خسارة محتملة</div>
+        <div class="big">${usd(s.worst_case_loss_usd)}</div>
+        <div class="row"><span class="label">تكلفة الحماية:</span> ${usd(s.cost_usd)}</div>
+        <div class="row"><span class="label">الأرباح المحفوظة:</span> ${usd(s.saved_usd)}</div>
+        <div class="row"><span class="label">العائد على الاستثمار:</span> ${s.roi_percent === null ? "-" : s.roi_percent + "%"}</div>
+      </div>`).join("");
+    document.getElementById("cards").innerHTML = html;
+  })
+  .catch(e => {
+    document.getElementById("cards").innerHTML = "";
+    document.getElementById("error").textContent = "تعذر الاتصال بالمحرك: " + e;
+  });
+</script>
+</body>
+</html>

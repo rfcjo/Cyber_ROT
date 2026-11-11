@@ -1,0 +1,8 @@
+[
+  {"id": "switch-1", "type": "Switch", "value_usd": 10000},
+  {"id": "kiosk-1", "type": "Kiosk", "value_usd": 5000},
+  {"id": "cctv-1", "type": "CCTV", "value_usd": 20000},
+  {"id": "bms-1", "type": "Cooling", "value_usd": 150000},
+  {"id": "pos-1", "type": "Payment", "value_usd": 300000},
+  {"id": "kiosk-2", "type": "Kiosk", "value_usd": 5000}
+]
