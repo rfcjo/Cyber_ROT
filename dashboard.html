@@ -1,64 +1,688 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cyber-ROI Dashboard</title>
-<style>
-  body { font-family: Tahoma, Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 24px; }
-  h1 { margin: 0 0 4px; }
-  .sub { color: #94a3b8; margin-bottom: 24px; }
-  .cards { display: flex; gap: 16px; flex-wrap: wrap; }
-  .card { background: #1e293b; border-radius: 12px; padding: 20px; flex: 1; min-width: 240px; border-top: 4px solid #64748b; }
-  .card.best { border-top-color: #22c55e; }
-  .card.warn { border-top-color: #ef4444; }
-  .card.mid { border-top-color: #f59e0b; }
-  .card h2 { margin: 0 0 12px; font-size: 18px; }
-  .big { font-size: 30px; font-weight: bold; margin: 4px 0; }
-  .label { color: #94a3b8; font-size: 13px; }
-  .row { margin-top: 12px; }
-  .note { margin-top: 24px; color: #94a3b8; font-size: 13px; }
-  #error { color: #fca5a5; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cyber_ROT | محاكي الاستثمار السيبراني</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* شاشة الدخول */
+
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            border-top: 4px solid #3b82f6;
+        }
+
+        .login-box h2 {
+            color: #60a5fa;
+        }
+
+        .login-box p {
+            color: #cbd5e1;
+            line-height: 1.8;
+        }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        #loader {
+            display: none;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
+        #error-message {
+            color: #f87171;
+            margin-top: 15px;
+            display: none;
+        }
+
+        /* لوحة التحكم */
+
+        #dashboard-screen {
+            display: none;
+            width: 95%;
+            max-width: 1200px;
+            padding: 40px 0;
+            animation: fadeIn 1s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #60a5fa;
+        }
+
+        .header p {
+            color: #94a3b8;
+        }
+
+        .status-box {
+            background: #064e3b;
+            color: #6ee7b7;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        /* البطاقات المالية */
+
+        .cards-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            border-top: 4px solid;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .card.danger {
+            border-top-color: #ef4444;
+        }
+
+        .card.warning {
+            border-top-color: #f59e0b;
+        }
+
+        .card.safe {
+            border-top-color: #10b981;
+        }
+
+        .price {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .card.danger .price {
+            color: #f87171;
+        }
+
+        .card.warning .price {
+            color: #fbbf24;
+        }
+
+        .card.safe .price {
+            color: #34d399;
+        }
+
+        .card p {
+            color: #94a3b8;
+        }
+
+        .roi {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        /* جدول الأجهزة */
+
+        .table-container {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            min-width: 600px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid #334155;
+        }
+
+        th {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        td {
+            color: #e2e8f0;
+        }
+
+        .status-safe {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .status-info {
+            color: #60a5fa;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            color: #64748b;
+            padding: 25px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .login-box {
+                padding: 25px;
+            }
+
+            .card {
+                min-width: 100%;
+            }
+
+            .header h1 {
+                font-size: 23px;
+            }
+
+            .price {
+                font-size: 27px;
+            }
+        }
+
+    </style>
 </head>
+
 <body>
-  <h1>محاكي العائد على الاستثمار السيبراني</h1>
-  <div class="sub">الأرقام بالدولار الأمريكي، مبنية على بيانات توضيحية</div>
-  <div id="error"></div>
-  <div class="cards" id="cards">جاري التحميل...</div>
-  <div class="note">تنبيه: قيم الأجهزة والتكاليف افتراضات تجريبية، وليست بيانات عميل حقيقية.</div>
 
-<script>
-const NAMES = {
-  no_protection: "بدون حماية",
-  segmentation: "فصل الشبكة",
-  segmentation_plus_critical: "فصل + حماية الأجهزة الحرجة"
-};
-const STYLES = {
-  no_protection: "warn",
-  segmentation: "mid",
-  segmentation_plus_critical: "best"
-};
-const usd = n => "$" + Number(n).toLocaleString("en-US");
+    <!-- شاشة البداية -->
 
-fetch("/scenarios")
-  .then(r => r.json())
-  .then(data => {
-    const html = data.scenarios.map(s => `
-      <div class="card ${STYLES[s.scenario]}">
-        <h2>${NAMES[s.scenario] || s.scenario}</h2>
-        <div class="label">أسوأ خسارة محتملة</div>
-        <div class="big">${usd(s.worst_case_loss_usd)}</div>
-        <div class="row"><span class="label">تكلفة الحماية:</span> ${usd(s.cost_usd)}</div>
-        <div class="row"><span class="label">الأرباح المحفوظة:</span> ${usd(s.saved_usd)}</div>
-        <div class="row"><span class="label">العائد على الاستثمار:</span> ${s.roi_percent === null ? "-" : s.roi_percent + "%"}</div>
-      </div>`).join("");
-    document.getElementById("cards").innerHTML = html;
-  })
-  .catch(e => {
-    document.getElementById("cards").innerHTML = "";
-    document.getElementById("error").textContent = "تعذر الاتصال بالمحرك: " + e;
-  });
-</script>
+    <div id="login-screen">
+
+        <div class="login-box">
+
+            <h2>🛡️ محرك Cyber_ROT</h2>
+
+            <p>
+                محاكي الاستثمار السيبراني الذكي
+                <br>
+                AI Cyber Security Simulation Engine
+            </p>
+
+            <p>
+                اضغط على الزر لتهيئة المحرك وتحميل نتائج المحاكاة.
+            </p>
+
+            <button id="start-button" onclick="startSimulation()">
+                تهيئة وتشغيل النظام
+            </button>
+
+            <div id="loader">
+                ⏳ جاري الاتصال بمحرك الذكاء الاصطناعي...
+            </div>
+
+            <div id="error-message"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- لوحة التحكم -->
+
+    <div id="dashboard-screen">
+
+        <div class="header">
+
+            <h1>🛡️ محاكي العائد على الاستثمار السيبراني</h1>
+
+            <p>
+                Cyber Security Return on Investment Simulation
+            </p>
+
+            <p>
+                النتائج مستخرجة من محرك المحاكاة الفعلي
+            </p>
+
+        </div>
+
+
+        <div class="status-box">
+
+            🟢 محرك Cyber_ROT متصل ويعمل بنجاح
+
+        </div>
+
+
+        <!-- البطاقات المالية -->
+
+        <h2>📊 مقارنة السيناريوهات المالية</h2>
+
+        <div class="cards-container">
+
+            <div class="card danger">
+
+                <h3>بدون حماية</h3>
+
+                <p>أسوأ خسارة محتملة</p>
+
+                <div class="price" id="loss-before">
+                    جاري الحساب...
+                </div>
+
+                <p>تكلفة الحماية: $0</p>
+
+                <div class="roi">
+                    خط الأساس
+                </div>
+
+            </div>
+
+
+            <div class="card warning">
+
+                <h3>فصل الشبكة</h3>
+
+                <p>أسوأ خسارة محتملة</p>
+
+                <div class="price" id="loss-segmentation">
+                    جاري الحساب...
+                </div>
+
+                <p id="cost-segmentation">
+                    تكلفة الحماية: جاري الحساب...
+                </p>
+
+                <div class="roi" id="roi-segmentation">
+                    ROI: --
+                </div>
+
+            </div>
+
+
+            <div class="card safe">
+
+                <h3>فصل + حماية الأجهزة الحرجة</h3>
+
+                <p>أسوأ خسارة محتملة</p>
+
+                <div class="price" id="loss-critical">
+                    جاري الحساب...
+                </div>
+
+                <p id="cost-critical">
+                    تكلفة الحماية: جاري الحساب...
+                </p>
+
+                <div class="roi" id="roi-critical">
+                    ROI: --
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- جدول الأجهزة -->
+
+        <div class="table-container">
+
+            <h2>📋 قائمة الأجهزة في الشبكة</h2>
+
+            <p style="color:#94a3b8">
+                بيانات الأجهزة المحملة من قاعدة بيانات المحاكاة
+            </p>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>معرف الجهاز</th>
+                        <th>نوع الجهاز</th>
+                        <th>القيمة المالية</th>
+                        <th>حالة البيانات</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="devices-table">
+
+                    <tr>
+                        <td colspan="4">
+                            جاري تحميل بيانات الأجهزة...
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- معلومات المحرك -->
+
+        <div class="table-container">
+
+            <h2>⚙️ معلومات محرك المحاكاة</h2>
+
+            <p id="engine-info">
+                جاري الاتصال...
+            </p>
+
+            <p>
+                Framework: FastAPI
+            </p>
+
+            <p>
+                Graph Analysis: NetworkX
+            </p>
+
+            <p>
+                Simulation Type: Virtual Only
+            </p>
+
+        </div>
+
+
+        <div class="footer">
+
+            <p>
+                CYBER_ROT | AI Simulation Engine | Version 2.0.0
+            </p>
+
+            <p>
+                Developed by: جعفر حسن حميد رشيد
+            </p>
+
+            <p>
+                قسم تقنيات هندسة الذكاء الاصطناعي
+                - الجامعة التقنية الوسطى
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- JavaScript وربط API -->
+
+    <script>
+
+        // تنسيق الأرقام بالدولار
+
+        function formatUSD(value) {
+
+            return new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+                maximumFractionDigits: 0
+            }).format(value);
+
+        }
+
+
+        // تحميل السيناريوهات
+
+        async function loadScenarios() {
+
+            const response = await fetch("/scenarios");
+
+            if (!response.ok) {
+                throw new Error("فشل تحميل السيناريوهات");
+            }
+
+            const data = await response.json();
+
+            const scenarios = data.scenarios;
+
+            const noProtection = scenarios.find(
+                s => s.scenario === "no_protection"
+            );
+
+            const segmentation = scenarios.find(
+                s => s.scenario === "segmentation"
+            );
+
+            const critical = scenarios.find(
+                s => s.scenario === "segmentation_plus_critical"
+            );
+
+            if (!noProtection || !segmentation || !critical) {
+                throw new Error("بيانات السيناريوهات غير مكتملة");
+            }
+
+            // بدون حماية
+
+            document.getElementById("loss-before").textContent =
+                formatUSD(noProtection.worst_case_loss_usd);
+
+
+            // فصل الشبكة
+
+            document.getElementById("loss-segmentation").textContent =
+                formatUSD(segmentation.worst_case_loss_usd);
+
+            document.getElementById("cost-segmentation").textContent =
+                "تكلفة الحماية: " + formatUSD(segmentation.cost_usd);
+
+            document.getElementById("roi-segmentation").textContent =
+                "ROI: " +
+                (segmentation.roi_percent === null
+                    ? "--"
+                    : segmentation.roi_percent + "%");
+
+
+            // فصل وحماية الأجهزة الحرجة
+
+            document.getElementById("loss-critical").textContent =
+                formatUSD(critical.worst_case_loss_usd);
+
+            document.getElementById("cost-critical").textContent =
+                "تكلفة الحماية: " + formatUSD(critical.cost_usd);
+
+            document.getElementById("roi-critical").textContent =
+                "ROI: " +
+                (critical.roi_percent === null
+                    ? "--"
+                    : critical.roi_percent + "%");
+
+        }
+
+
+        // تحميل بيانات الأجهزة
+
+        async function loadDevices() {
+
+            const response = await fetch("/network");
+
+            if (!response.ok) {
+                throw new Error("فشل تحميل بيانات الأجهزة");
+            }
+
+            const data = await response.json();
+
+            const table = document.getElementById("devices-table");
+
+            table.innerHTML = "";
+
+            data.devices.forEach(device => {
+
+                const row = document.createElement("tr");
+
+                const id = document.createElement("td");
+                id.textContent = device.id;
+
+                const type = document.createElement("td");
+                type.textContent = device.type;
+
+                const value = document.createElement("td");
+                value.textContent = formatUSD(device.value_usd);
+
+                const status = document.createElement("td");
+                status.textContent = "ضمن نموذج المحاكاة";
+                status.className = "status-info";
+
+                row.appendChild(id);
+                row.appendChild(type);
+                row.appendChild(value);
+                row.appendChild(status);
+
+                table.appendChild(row);
+
+            });
+
+        }
+
+
+        // تحميل معلومات المحرك
+
+        async function loadEngine() {
+
+            const response = await fetch("/");
+
+            if (!response.ok) {
+                throw new Error("فشل الاتصال بالمحرك");
+            }
+
+            const data = await response.json();
+
+            document.getElementById("engine-info").textContent =
+                "Project: " + data.project +
+                " | Engine: " + data.engine +
+                " | Version: " + data.version +
+                " | Status: " + data.status;
+
+        }
+
+
+        // تشغيل النظام
+
+        async function startSimulation() {
+
+            const button = document.getElementById("start-button");
+
+            const loader = document.getElementById("loader");
+
+            const error = document.getElementById("error-message");
+
+            button.disabled = true;
+
+            loader.style.display = "block";
+
+            error.style.display = "none";
+
+            try {
+
+                await Promise.all([
+                    loadEngine(),
+                    loadScenarios(),
+                    loadDevices()
+                ]);
+
+                document.getElementById("login-screen").style.display =
+                    "none";
+
+                document.getElementById("dashboard-screen").style.display =
+                    "block";
+
+            }
+
+            catch (err) {
+
+                console.error(err);
+
+                error.textContent =
+                    "تعذر الاتصال بمحرك Cyber_ROT. تأكد من تشغيل السيرفر.";
+
+                error.style.display = "block";
+
+                button.disabled = false;
+
+            }
+
+            finally {
+
+                loader.style.display = "none";
+
+            }
+
+        }
+
+    </script>
+
 </body>
 </html>
